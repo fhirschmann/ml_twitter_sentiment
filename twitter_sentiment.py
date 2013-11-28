@@ -1,7 +1,7 @@
 # Twitter sentiment analysis project
 #
 # Group name:
-# Group members:
+# Group members: Dominik Schreiber, Ji-Ung Lee, Fabian Hirschmann
 #
 
 import sqlite3

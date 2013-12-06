@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     pipeline = Pipeline(estimators)
 
-    grid_search = GridSearchCV(pipeline, params)
+    grid_search = GridSearchCV(pipeline, params, score_func=f1_score)
 
     grid_search.fit(X, y)
 

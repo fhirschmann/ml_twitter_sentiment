@@ -18,6 +18,7 @@ from sklearn.metrics import f1_score
 from sklearn import svm
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn import cross_validation
+from sklearn.grid_search import GridSearchCV
 from nltk.classify.scikitlearn import SklearnClassifier
 from nltk import word_tokenize
 
@@ -67,6 +68,7 @@ def retrieve_tweets_db(db_name, limit=-1) :
     corpus = crs.fetchall()
     return corpus
 
+
 if __name__ == '__main__':
     ts = TwitterSentiment()
 
@@ -75,14 +77,25 @@ if __name__ == '__main__':
     dt = [(t, MAPPING[s]) for (t, s) in corpus]
     tweets, outcomes = zip(*dt)
     y = np.array(outcomes)
-    X = vectorizer.fit_transform(tweets).toarray()
+    vectorizer = CountVectorizer()
+    X = vectorizer.fit_transform(tweets)
 
-    vectorizer = TfidfVectorizer()
+    estimators = [("svm", svm.SVC())]
+    params = {
+        "svm__C": [0.1, 10, 100, 1000, 10000]
+    }
 
-    gn = GaussianNB()
+    pipeline = Pipeline(estimators)
 
-    print cross_validation.cross_val_score(gn, X, y, cv=10,
-                                           score_func=f1_score)
+    grid_search = GridSearchCV(pipeline, params)
+
+    grid_search.fit(X, y)
+
+    print("Best score: %0.3f" % grid_search.best_score_)
+    print("Best parameters set:")
+    best_parameters = grid_search.best_estimator_.get_params()
+    for param_name in sorted(params.keys()):
+        print("\t%s: %r" % (param_name, best_parameters[param_name]))
 
     #you can vectorize your TwitterSentiment class by using pickle:
     #pickle.dump(ts, 'TwitterSentiment.pickle')

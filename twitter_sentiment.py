@@ -7,6 +7,28 @@
 import sqlite3
 import csv
 import pickle
+import numpy as np
+
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.naive_bayes import MultinomialNB, GaussianNB
+from sklearn.metrics import f1_score
+from sklearn import svm
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn import cross_validation
+from nltk.classify.scikitlearn import SklearnClassifier
+from nltk import word_tokenize
+
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_regression
+
+MAPPING = {
+    ':)': 0,
+    ':(': 1,
+    '<3': 2
+}
 
 #This class is used to test your classifier on unseen data in Feburary.
 #It should contain everything that is needed to predict a text, e.g. your classifier and vectorizer,
@@ -47,8 +69,20 @@ def retrieve_tweets_db(db_name, limit=-1) :
 
 if __name__ == '__main__':
     ts = TwitterSentiment()
-    #call your functions here to load and process the corpus
-    #then vectorize your data and train a classifier
+
+    corpus = retrieve_tweets_db("tweets.small.db", 1000)
+
+    dt = [(t, MAPPING[s]) for (t, s) in corpus]
+    tweets, outcomes = zip(*dt)
+    y = np.array(outcomes)
+    X = vectorizer.fit_transform(tweets).toarray()
+
+    vectorizer = TfidfVectorizer()
+
+    gn = GaussianNB()
+
+    print cross_validation.cross_val_score(gn, X, y, cv=10,
+                                           score_func=f1_score)
 
     #you can vectorize your TwitterSentiment class by using pickle:
-    pickle.dump(ts, 'TwitterSentiment.pickle')
+    #pickle.dump(ts, 'TwitterSentiment.pickle')

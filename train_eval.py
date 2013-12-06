@@ -56,5 +56,7 @@ if __name__ == "__main__":
             print("\t%s: %r" % (param_name, best_parameters[param_name]))
         print("Complete grid:")
         df = DataFrame.from_dict([dict(x[0], **{'score': x[1]}) for x in grid_search.grid_scores_])
+        with open("res_" + name + ".tex", "w") as f:
+            f.write(df.to_latex())
         print(df)
         print()

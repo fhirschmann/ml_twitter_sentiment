@@ -12,6 +12,7 @@ from sklearn.linear_model import Perceptron, RidgeClassifier
 from sklearn.grid_search import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score
+from pandas import DataFrame
 
 from data import retrieve_tweets_db
 
@@ -53,4 +54,7 @@ if __name__ == "__main__":
         best_parameters = grid_search.best_estimator_.get_params()
         for param_name in sorted(estimators[name][1].keys()):
             print("\t%s: %r" % (param_name, best_parameters[param_name]))
+        print("Complete grid:")
+        df = DataFrame.from_dict([dict(x[0], **{'score': x[1]}) for x in grid_search.grid_scores_])
+        print(df)
         print()

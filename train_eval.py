@@ -8,6 +8,7 @@ from __future__ import print_function
 import numpy as np
 from sklearn import svm
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.linear_model import Perceptron, RidgeClassifier
 from sklearn.grid_search import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score
@@ -16,13 +17,14 @@ from data import retrieve_tweets_db
 
 
 estimators = {
-    'linsvm': (svm.LinearSVC(), {'linsvm__C': [0.1, 10, 100, 1000, 10000]}),
-    'svm': (svm.SVC(), {'svm__C': [0.1, 10, 100, 1000, 10000]})
+    'svm': (svm.SVC(), {'svm__C': [0.1, 10, 100, 1000, 10000],
+                        'svm__kernel': ['linear', 'poly', 'rbf']}),
+    'nn': (Perceptron(), {'nn__alpha': [0.0001, 0.001]}),
+    'ridge': (RidgeClassifier(), {'ridge__alpha': [1, 0.1, 0.001]}),
 }
 
 
 if __name__ == "__main__":
-
     tweets, outcomes = retrieve_tweets_db("tweets.small.db", 1000)
 
     y = np.array(outcomes)
@@ -42,7 +44,7 @@ if __name__ == "__main__":
         grid_search.fit(X, y)
         results.append((name, grid_search))
 
-    results = sorted(results, key=lambda r: r[1].best_score_)
+    results = sorted(results, reverse=True, key=lambda r: r[1].best_score_)
 
     for name, grid_search in results:
         print("==== " + name + " ====")

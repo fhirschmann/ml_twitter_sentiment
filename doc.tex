@@ -6,6 +6,7 @@
 \usepackage{fancyhdr,lastpage}
 \usepackage{hyperref}
 \usepackage{geometry}
+\usepackage{booktabs}
 \geometry{hmargin={2cm,2cm},vmargin={2.4cm,3cm}}
 \usepackage{comment}
 \usepackage{tikz}
@@ -26,4 +27,12 @@
 \begin{document}
 
 \section{Introduction}
+\section{Cross-Validation and Tuning Results}
+\subsection{Support Vector Machines}
+\input{res_svm.tex}
+\subsection{Neural Networks (Perceptron)}
+\input{res_nn.tex}
+\subsection{Ridge Regression}
+\input{res_ridge.tex}
+
 \end{document}

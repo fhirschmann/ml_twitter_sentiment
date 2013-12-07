@@ -55,6 +55,6 @@ class TweetProcessor:
 
 
 if __name__ == '__main__':
-	tp = TweetProcessor('/Users/dominik/Downloads/tweets.small.db')
+	tp = TweetProcessor('tweets.small.db')
 	for search, tweet in tp.get_corpus():
 		print search, '->', ' '.join(tweet)

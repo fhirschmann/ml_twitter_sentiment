@@ -5,11 +5,9 @@ from data import MAPPING
 
 
 class TweetProcessor:
-	connection = False
-	corpus = False
-
 	def __init__(self, database_url):
 		self.connection = sqlite3.connect(database_url)
+		self.corpus = None
 
 	def get_raw(self, amount = False):
 		if amount:

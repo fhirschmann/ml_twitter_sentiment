@@ -20,8 +20,8 @@ from data import retrieve_tweets_db
 estimators = {
     'svm': (svm.SVC(), {'svm__C': [0.1, 10, 100, 1000, 10000],
                         'svm__kernel': ['linear', 'poly', 'rbf']}),
-    'nn': (Perceptron(), {'nn__alpha': [0.0001, 0.001]}),
-    'ridge': (RidgeClassifier(), {'ridge__alpha': [1, 0.1, 0.001]}),
+    'nn': (Perceptron(), {'nn__penalty': [None, 'l2', 'elasticnet']}),
+    'ridge': (RidgeClassifier(), {'ridge__alpha': [1, 0.1, 0.01, 0.001]}),
 }
 
 
@@ -56,6 +56,9 @@ if __name__ == "__main__":
             print("\t%s: %r" % (param_name, best_parameters[param_name]))
         print("Complete grid:")
         df = DataFrame.from_dict([dict(x[0], **{'score': x[1]}) for x in grid_search.grid_scores_])
+        df = df.reindex(columns=grid_search.grid_scores_[0][0].keys() + ["score"])
+        df = df.sort(columns="score", ascending=False)
+        df.reset_index(drop=True, inplace=True)
         with open("res_" + name + ".tex", "w") as f:
             f.write(df.to_latex())
         print(df)

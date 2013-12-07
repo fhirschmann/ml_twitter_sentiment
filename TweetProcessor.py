@@ -1,6 +1,8 @@
 import sqlite3
 import re
 
+from data import MAPPING
+
 
 class TweetProcessor:
 	connection = False
@@ -23,7 +25,7 @@ class TweetProcessor:
 		clean = []
 		for word in words:
 			clean += self.process_word(word)
-		return (tweet[0], clean)
+		return (MAPPING[tweet[0]], clean)
 
 	def process_word(self, word):
 		if len(word) > 0:

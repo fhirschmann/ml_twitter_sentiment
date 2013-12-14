@@ -18,15 +18,15 @@ from data import retrieve_tweets_db
 
 
 estimators = {
-    'svm': (svm.SVC(), {'svm__C': [0.1, 10, 100, 1000, 10000],
-                        'svm__kernel': ['linear', 'poly', 'rbf']}),
-    'nn': (Perceptron(), {'nn__penalty': [None, 'l2', 'elasticnet']}),
+    'svm': (svm.SVC(), {'svm__C': [0.1, 1, 1e2, 1e4, 1e8, 1e16, 1e32],
+                        'svm__kernel': ['linear', 'rbf']}),
+    'nn': (Perceptron(), {'nn__penalty': [None, 'elasticnet']}),
     'ridge': (RidgeClassifier(), {'ridge__alpha': [1, 0.1, 0.01, 0.001]}),
 }
 
 
 if __name__ == "__main__":
-    tweets, outcomes = retrieve_tweets_db("tweets.small.db", 1000)
+    tweets, outcomes = retrieve_tweets_db("tweets.small.db", 600)
 
     y = np.array(outcomes)
     vectorizer = CountVectorizer()
@@ -40,7 +40,8 @@ if __name__ == "__main__":
 
     for name, estimator in estimators.items():
         grid_search = GridSearchCV(Pipeline(pipeline + [(name, estimator[0])]),
-                                   estimator[1], score_func=f1_score)
+                                   estimator[1], score_func=f1_score,
+                                   n_jobs=2, cv=10)
 
         grid_search.fit(X, y)
         results.append((name, grid_search))
@@ -61,5 +62,7 @@ if __name__ == "__main__":
         df.reset_index(drop=True, inplace=True)
         with open("res_" + name + ".tex", "w") as f:
             f.write(df.to_latex())
+        with open("res_" + name + ".csv", "w") as f:
+            f.write(df.to_csv())
         print(df)
         print()

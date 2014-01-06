@@ -23,12 +23,13 @@ class TweetProcessor:
 
     def process_word(self, word, additional_preprocessing = True):
         if len(word) > 0:
-            if additional_preprocessing and word[0] == '@':
-                return [u'<user>']
-            if additional_preprocessing and word[0] == '#':
-                return [w.lower() for w in re.sub(r'([a-z])([A-Z])', r'\g<1> \g<2>', word[1:]).split(' ')]
-            if additional_preprocessing and word[:4] == 'http':
-                return [u'<url>']
+            if additional_preprocessing:
+                if word[0] == '@':
+                    return [u'<user>']
+                if word[0] == '#':
+                    return [w.lower() for w in re.sub(r'([a-z])([A-Z])', r'\g<1> \g<2>', word[1:]).split(' ')]
+                if word[:4] == 'http':
+                    return [u'<url>']
             # unicode-heart, html-heart, encoded html-heart, text-heart,
             # everything ending with ) and not starting with (, everything ending with )
             # everything starting with :

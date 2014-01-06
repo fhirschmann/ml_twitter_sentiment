@@ -10,25 +10,28 @@ class TweetProcessor:
         self.corpus = None
         self.raw = None
 
-    def process_tweets(self, tweets):
-        return map(self.process_tweet, filter(self.allow_tweet, tweets))
+    def process_tweets(self, tweets, additional_preprocessing = True):
+        return map(lambda x: self.process_tweet(x, additional_preprocessing), filter(self.allow_tweet, tweets))
 
-    def process_tweet(self, tweet):
+    def process_tweet(self, tweet, additional_preprocessing = True):
         words = tweet[1].replace('"', '').replace('\n', ' ').split(' ')
         clean = []
         for word in words:
-            clean += self.process_word(word)
+            clean += self.process_word(word, additional_preprocessing)
         return (MAPPING[tweet[0]], clean)
 
-    def process_word(self, word):
+    def process_word(self, word, additional_preprocessing = True):
         if len(word) > 0:
-            if word[0] == '@':
+            if additional_preprocessing and word[0] == '@':
                 return ['<user>']
-            if word[0] == '#':
+            if additional_preprocessing and word[0] == '#':
                 return re.sub(r'([a-z])([A-Z])', r'\g<1> \g<2>', word[1:]).split(' ')
-            if word[:4] == 'http':
+            if additional_preprocessing and word[:4] == 'http':
                 return ['<url>']
-            for mood in [u'\u2665', r'&lt;3+', r'&amp;lt;3+', r'<3+', r':\)+', r':-\)+', r':\(+', r':-\(+']:
+            # unicode-heart, html-heart, encoded html-heart, text-heart,
+            # everything ending with ) and not starting with (, everything ending with )
+            # everything starting with :
+            for mood in [u'\u2665', r'&lt;3+', r'&amp;lt;3+', r'<3+', r'[^\(]*\)+', r'.*\(+', r':.*']:
                 word = re.sub(mood, '', word)
             if len(word) > 0:
                 return [word]
@@ -43,7 +46,7 @@ class TweetProcessor:
     def build_raw(self, amount = False):
         if amount:
             self.raw = self.connection.execute('SELECT search_term, text FROM tweets LIMIT 0, %d' % amount).fetchall()
-        else
+        else:
             self.raw = self.connection.execute('SELECT search_term, text FROM tweets').fetchall()
 
     def get_raw(self, amount = False):
@@ -51,16 +54,16 @@ class TweetProcessor:
             self.build_raw(amount)
         return self.raw
 
-    def build_corpus(self, amount = False):
-        self.corpus = self.process_tweets(self.get_raw(amount))
+    def build_corpus(self, additional_preprocessing = True, amount = False):
+        self.corpus = self.process_tweets(self.get_raw(amount), additional_preprocessing)
 
-    def get_corpus(self, amount = False):
-        if not self.corpus or (amount and len(self.corpus) != amount):
-            self.build_corpus(amount)
+    def get_corpus(self, additional_preprocessing = True, amount = False):
+        if not self.corpus or (amount and len(self.corpus) != amount) or not additional_preprocessing:
+            self.build_corpus(additional_preprocessing, amount)
         return self.corpus
 
 
 if __name__ == '__main__':
-    tp = TweetProcessor('tweets.small.db')
+    tp = TweetProcessor('/Users/dominik/Downloads/tweets.small.db')
     for search, tweet in tp.get_corpus():
         print search, '->', ' '.join(tweet)

@@ -1,5 +1,6 @@
 import sqlite3
 import re
+import pprint
 
 from data import MAPPING
 
@@ -18,23 +19,23 @@ class TweetProcessor:
         clean = []
         for word in words:
             clean += self.process_word(word, additional_preprocessing)
-        return (MAPPING[tweet[0]], clean)
+        return (clean, MAPPING[tweet[0]])
 
     def process_word(self, word, additional_preprocessing = True):
         if len(word) > 0:
             if additional_preprocessing and word[0] == '@':
-                return ['<user>']
+                return [u'<user>']
             if additional_preprocessing and word[0] == '#':
-                return re.sub(r'([a-z])([A-Z])', r'\g<1> \g<2>', word[1:]).split(' ')
+                return [w.lower() for w in re.sub(r'([a-z])([A-Z])', r'\g<1> \g<2>', word[1:]).split(' ')]
             if additional_preprocessing and word[:4] == 'http':
-                return ['<url>']
+                return [u'<url>']
             # unicode-heart, html-heart, encoded html-heart, text-heart,
             # everything ending with ) and not starting with (, everything ending with )
             # everything starting with :
             for mood in [u'\u2665', r'&lt;3+', r'&amp;lt;3+', r'<3+', r'[^\(]*\)+', r'.*\(+', r':.*']:
                 word = re.sub(mood, '', word)
             if len(word) > 0:
-                return [word]
+                return [word.lower()]
             else:
                 return []
         else:
@@ -65,5 +66,4 @@ class TweetProcessor:
 
 if __name__ == '__main__':
     tp = TweetProcessor('/Users/dominik/Downloads/tweets.small.db')
-    for search, tweet in tp.get_corpus():
-        print search, '->', ' '.join(tweet)
+    pprint.pprint(tp.get_corpus(amount=100))

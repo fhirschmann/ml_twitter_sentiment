@@ -65,5 +65,5 @@ class TweetProcessor:
 
 
 if __name__ == '__main__':
-    tp = TweetProcessor('/Users/dominik/Downloads/tweets.small.db')
-    pprint.pprint(tp.get_corpus(amount=100))
+    tp = TweetProcessor('tweets.small.db')
+    pprint.pprint(tp.get_corpus())

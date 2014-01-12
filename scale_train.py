@@ -14,6 +14,8 @@ from sklearn.cross_validation import cross_val_score
 from pandas import DataFrame
 
 from data import retrieve_tweets_db
+from TweetProcessor import *
+#from TweetProcessor import process_tweets
 
 
 pipeline = [
@@ -21,7 +23,12 @@ pipeline = [
 ]
 
 if __name__ == "__main__":
-    allData, outcome = retrieve_tweets_db("tweets.small.db", 100)
+    processor = TweetProcessor("tweets.small.db")
+    print(processor.get_corpus(False,100))
+    allData = []
+    for x in processor.get_corpus(False,100):
+        allData = allData + x[0]
+    outcome = [x[1] for x in processor.get_corpus(False,100)]
     breakpoint = len(allData)
     if breakpoint > 1000:
 	breakpoint = int(len(allData)*0.05)

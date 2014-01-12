@@ -24,31 +24,28 @@ pipeline = [
 
 if __name__ == "__main__":
     processor = TweetProcessor("tweets.small.db")
-    print(processor.get_corpus(False,100))
-    allData = []
-    for x in processor.get_corpus(False,100):
-        allData = allData + x[0]
-    outcome = [x[1] for x in processor.get_corpus(False,100)]
+    allData, outcomes = retrieve_tweets_db("tweets.small.db",100)
+    
     breakpoint = len(allData)
     if breakpoint > 1000:
-	breakpoint = int(len(allData)*0.05)
+        breakpoint = int(len(allData)*0.05)
     results = []
     # 2^5 = 32, with 10 folds we need at least more than one example for 
     # each fold, which sums up to 10*2 = 20 examples at least for training.
     iterator = 5
     while ((2**iterator)-1) < breakpoint:
-	SomeData = random.sample(allData, ((2**iterator)-1))
-	y = np.array(SomeData)
-	vectorizer = CountVectorizer()
-    	X = vectorizer.fit_transform(SomeData)
-	scores = cross_val_score(Pipeline(pipeline+[('ridge', RidgeClassifier())]), X, y, scoring=f1_score, cv=10, n_jobs=1, verbose=0, fit_params=None, score_func=f1_score, pre_dispatch='2*n_jobs')
-    	results.append((len(SomeData),scores))
-	iterator = iterator + 1
+        y = np.array(outcomes[0:((2**iterator)-1)])
+        vectorizer = CountVectorizer()
+    	X = vectorizer.fit_transform(allData[0:((2**iterator)-1)])
+        scores = cross_val_score(Pipeline(pipeline+[('ridge', RidgeClassifier())]), X, y, scoring=f1_score, cv=10, n_jobs=1, verbose=2, fit_params=None, score_func=f1_score, pre_dispatch='2*n_jobs')
+    	results.append((((2**iterator)-1),scores))
+        iterator = iterator + 1
+        
     if breakpoint < 1000:
-	y = np.array(allData)
-	vectorizer = CountVectorizer()
+        y = np.array(outcomes)
+        vectorizer = CountVectorizer()
     	X = vectorizer.fit_transform(allData)
-	scores = cross_val_score(Pipeline(pipeline+[('ridge', RidgeClassifier())]), X, y, scoring=f1_score, cv=10, n_jobs=1, verbose=0, fit_params=None, score_func=f1_score, pre_dispatch='2*n_jobs')
+        scores = cross_val_score(Pipeline(pipeline+[('ridge', RidgeClassifier())]), X, y, scoring=f1_score, cv=10, n_jobs=1, verbose=0, fit_params=None, score_func=f1_score, pre_dispatch='2*n_jobs')
     	results.append((len(allData),scores))
 
     amount = [x[0] for x in results]

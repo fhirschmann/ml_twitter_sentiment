@@ -1,64 +1,40 @@
 #!/usr/bin/env python
-"""
-Evaluates different classifiers with increasing the training dataset
-"""
-from __future__ import print_function
-
-import numpy as np
-import random
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, HashingVectorizer
-from sklearn.linear_model import Perceptron, RidgeClassifier, RidgeClassifierCV
+from sklearn.linear_model import RidgeClassifier, SGDClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import f1_score
-from sklearn.cross_validation import cross_val_score
-from pandas import DataFrame
+from sklearn.feature_extraction.text import HashingVectorizer
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import classification_report
+import numpy as np
 
-from data import retrieve_tweets_db
-from TweetProcessor import *
-#from TweetProcessor import process_tweets
+from TweetProcessor import TweetProcessor
 
+vectorizer = HashingVectorizer()
 
-pipeline = [
-    ('tfidf', TfidfTransformer()),
-]
 
 if __name__ == "__main__":
-    processor = TweetProcessor("tweets.small.db")
-    allData, outcomes = retrieve_tweets_db("tweets.small.db",100)
+    # Total corpus sizes (11, 20) may be a good range?
+    for exp in range(14, 16):
+        size = 2 ** exp
 
-    breakpoint = len(allData)
-    if breakpoint > 1000:
-        breakpoint = int(len(allData)*0.05)
-    results = []
-    # 2^5 = 32, with 10 folds we need at least more than one example for
-    # each fold, which sums up to 10*2 = 20 examples at least for training.
-    iterator = 5
-    while ((2**iterator)-1) < breakpoint:
-        y = np.array(outcomes[0:((2**iterator)-1)])
-        vectorizer = CountVectorizer()
-        X = vectorizer.fit_transform(allData[0:((2**iterator)-1)])
-        scores = cross_val_score(Pipeline(pipeline+[('ridge', RidgeClassifier())]), X, y,
-                                 scoring=f1_score, cv=10, n_jobs=1, verbose=2,
-                                 fit_params=None, score_func=f1_score, pre_dispatch='2*n_jobs')
-        results.append((((2**iterator)-1),scores))
-        iterator = iterator + 1
+        # Minimal or full preprocessing
+        for pp in [True, False]:
 
-    if breakpoint < 1000:
-        y = np.array(outcomes)
-        vectorizer = CountVectorizer()
-        X = vectorizer.fit_transform(allData)
-        scores = cross_val_score(Pipeline(pipeline+[('ridge', RidgeClassifier())]), X, y,
-                                 scoring=f1_score, cv=10, n_jobs=1, verbose=0, fit_params=None,
-                                 score_func=f1_score, pre_dispatch='2*n_jobs')
-        results.append((len(allData),scores))
+            # Train and evaluate with two classifiers
+            for cls in [RidgeClassifier(), SGDClassifier()]:
+                print("Now training a %s classifier with %s instances (Train-test-split of 5 to 95) and %s pp" % (
+                    cls.__class__.__name__, size, "full" if pp else "minimal"))
 
-    amount = [x[0] for x in results]
-    score = [0.1*sum(x[1]) for x in results]
-    print(amount, score)
-    df = DataFrame.from_dict({x[0]:[0.1*sum(x[1])] for x in results})
-    with open("res_" + "Ridge_Scale" + ".tex", "w") as f:
-	f.write(df.to_latex())
-    #with open("res_" + "Ridge_Scale" + ".csv", "w") as f:
-    #	f.write(df.to_csv())
-    print(df)
-    print()
+                processor = TweetProcessor("tweets.small.db")
+                corpus = processor.get_corpus(pp, size)
+                tweets, outcomes = zip(*corpus)
+
+                tweets = [" ".join(sen) for sen in tweets]
+                y = np.array(outcomes)
+
+                X = vectorizer.fit_transform(tweets)
+                
+                X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=0.95, random_state=0)
+                cls.fit(X_train,y_train)
+                y_predicted = cls.predict(X_test)
+                target_names = ['class 0', 'class 1', 'class 2']
+                print(classification_report(y_test, y_predicted, target_names=target_names))

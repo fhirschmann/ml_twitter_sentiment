@@ -28,5 +28,15 @@
 
 \section{Introduction}
 \section{Validation and Tuning Results}
+\section{Q: What is better for this project, more data or a better algorithm?}
+Ideally, both of these points. However, the classifier benefits more from a larger
+training corpus. We have tried SVMs and Neural Networks on a smaller corpus and
+the results were only slightly better than with Stochastic Gradient Descent or
+Ridge Regression whilst the training time increased tremendously. For a larger
+corpus and limited resources, it is therefore better to choose a rather fast algorithm.
+As far as preprocessing is concerned, it should always be done because it is relatively
+cheap to do (in terms of computing time) and the final model benefits greatly from
+it.
+
 
 \end{document}

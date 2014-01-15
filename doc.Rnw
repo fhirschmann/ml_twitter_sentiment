@@ -48,7 +48,7 @@ print(xtable(dt[dt$pp == F & dt$classifier == "SGDClassifier", !names(dt) %in% c
 @
 \subsubsection{With full pre-processing}
 <<results="asis">>=
-print(xtable(dt[dt$pp == F & dt$classifier == "SGDClassifier", !names(dt) %in% c("pp", "classifier")]),
+print(xtable(dt[dt$pp == T & dt$classifier == "SGDClassifier", !names(dt) %in% c("pp", "classifier")]),
      table.placement="H", include.rownames=F)
 @
 \subsection{Ridge}
@@ -59,7 +59,7 @@ print(xtable(dt[dt$pp == F & dt$classifier == "RidgeClassifier", !names(dt) %in%
 @
 \subsubsection{With full pre-processing}
 <<results="asis">>=
-print(xtable(dt[dt$pp == F & dt$classifier == "RidgeClassifier", !names(dt) %in% c("pp", "classifier")]),
+print(xtable(dt[dt$pp == T & dt$classifier == "RidgeClassifier", !names(dt) %in% c("pp", "classifier")]),
      table.placement="H", include.rownames=F)
 @
 \section{Q: What is better for this project, more data or a better algorithm?}

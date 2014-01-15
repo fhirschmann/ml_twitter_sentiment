@@ -3,7 +3,6 @@ import csv
 import sys
 
 from sklearn.linear_model import RidgeClassifier, SGDClassifier
-from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report

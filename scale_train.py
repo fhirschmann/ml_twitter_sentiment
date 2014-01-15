@@ -29,8 +29,8 @@ if __name__ == "__main__":
 
             # Train and evaluate with two classifiers
             for cls in [RidgeClassifier(), SGDClassifier()]:
-                print("Now training a %s classifier with %s instances (Train-test-split of 5 to 95) and %s pp" % (
-                    cls.__class__.__name__, size, "full" if pp else "minimal"))
+                print("Now training a %s with %s instances (Train-test-split of 5 to 95) and %s pp" % (
+                      cls.__class__.__name__, size, "full" if pp else "minimal"))
 
                 processor = TweetProcessor("tweets.small.db" if TESTING else "tweets.big.db")
                 corpus = processor.get_corpus(pp, size)

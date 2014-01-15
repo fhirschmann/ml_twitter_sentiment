@@ -10,7 +10,7 @@ import numpy as np
 
 from TweetProcessor import TweetProcessor
 
-vectorizer = HashingVectorizer()
+vectorizer = HashingVectorizer(norm="l1")
 
 
 TESTING = "--test" in sys.argv

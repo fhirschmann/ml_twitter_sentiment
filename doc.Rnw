@@ -28,6 +28,7 @@
 \fancyfoot[C]{Page \thepage\ of \pageref{LastPage}}
 
 <<setup, include=FALSE>>=
+# Install these packages besides the "knitr" package using install.packages("...")
 library(xtable)
 
 opts_chunk$set(echo=F, breaklines=T)

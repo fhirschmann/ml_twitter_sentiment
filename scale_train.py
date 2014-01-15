@@ -7,10 +7,11 @@ from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 import numpy as np
+from nltk.corpus import stopwords
 
 from TweetProcessor import TweetProcessor
 
-vectorizer = HashingVectorizer(norm="l1")
+vectorizer = HashingVectorizer(norm="l1", stop_words=stopwords.words("english"))
 
 
 TESTING = "--test" in sys.argv

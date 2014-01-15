@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 y = np.array(outcomes)
 
                 X = vectorizer.fit_transform(tweets)
-                
+
                 X_train,X_test,y_train,y_test = train_test_split(X, y, test_size=0.95, random_state=0)
                 cls.fit(X_train,y_train)
                 y_predicted = cls.predict(X_test)
@@ -46,6 +46,6 @@ if __name__ == "__main__":
 		csv_table += [[size,len(y_train), cls.__class__.__name__, pp, precision, recall, f1_score]]
 
     with open('split_result.csv','wb') as f:
-	writer = csv.writer(f)
-	writer.writerows(csv_table)
+        writer = csv.writer(f)
+        writer.writerows(csv_table)
 

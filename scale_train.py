@@ -45,10 +45,10 @@ if __name__ == "__main__":
                 cls.fit(X_train,y_train)
                 y_predicted = cls.predict(X_test)
                 target_names = ['class 0', 'class 1', 'class 2']
-		result = classification_report(y_test, y_predicted, target_names=target_names).split()
-		# Take only the averaged scores over the three classes
-		precision, recall, f1_score = result[-4], result[-3], result[-2]
-		csv_table += [[size,len(y_train), cls.__class__.__name__, pp, precision, recall, f1_score]]
+        result = classification_report(y_test, y_predicted, target_names=target_names).split()
+        # Take only the averaged scores over the three classes
+        precision, recall, f1_score = result[-4], result[-3], result[-2]
+        csv_table += [[size,len(y_train), cls.__class__.__name__, pp, precision, recall, f1_score]]
 
     with open('split_result.csv','wb') as f:
         writer = csv.writer(f)

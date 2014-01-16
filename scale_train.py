@@ -9,6 +9,7 @@ import numpy as np
 from TweetProcessor import TweetProcessor
 from vect import vectorizer
 from cls import cls1, cls2
+from pp import PreProcessor
 
 
 TESTING = "--test" in sys.argv
@@ -31,9 +32,8 @@ if __name__ == "__main__":
                     print("Now training a %s with %s instances (Train-test-split of 5 to 95) and %s pp" % (
                         cls.__class__.__name__, size, "full" if pp else "minimal"))
 
-                    processor = TweetProcessor("tweets.small.db" if TESTING else "tweets.big.db")
-                    corpus = processor.get_corpus(pp, size)
-                    tweets, outcomes = zip(*corpus)
+                    pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", size, pp)
+                    tweets, outcomes = zip(*pp.tweets())
 
                     tweets = [" ".join(sen) for sen in tweets]
                     y = np.array(outcomes)

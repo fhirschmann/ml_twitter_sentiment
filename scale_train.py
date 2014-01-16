@@ -3,15 +3,12 @@ import csv
 import sys
 
 from sklearn.linear_model import RidgeClassifier, SGDClassifier
-from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 import numpy as np
-from nltk.corpus import stopwords
 
 from TweetProcessor import TweetProcessor
-
-vectorizer = HashingVectorizer(norm="l1", stop_words=stopwords.words("english"))
+from vect import vectorizer
 
 
 TESTING = "--test" in sys.argv
@@ -21,7 +18,7 @@ if __name__ == "__main__":
     csv_table = [['size', 'training_size', 'classifier', 'pp', 'precision', 'recall', 'f1_score']]
 
     # 2^22 = 4194304 < 5292305 (# of rows in tweets.big.db)
-    for exp in (xrange(9, 10) if TESTING else xrange(10, 22)):
+    for exp in (xrange(15, 16) if TESTING else xrange(10, 22)):
         size = 2 ** exp
 
         # Minimal or full preprocessing
@@ -49,6 +46,7 @@ if __name__ == "__main__":
                 result = classification_report(y_test, y_predicted, target_names=target_names).split()
                 # Take only the averaged scores over the three classes
                 precision, recall, f1_score = result[-4], result[-3], result[-2]
+                print f1_score
                 csv_table += [[size, len(y_train), cls.__class__.__name__, pp, precision, recall, f1_score]]
 
     with open('split_result.csv', 'wb') as f:

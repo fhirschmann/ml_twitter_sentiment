@@ -55,13 +55,13 @@ class PreProcessor(object):
                 if word[0] == '@':
                     return [u'<user>']
                 if word[0] == '#':
-                    return [w.lower() for w in re.sub(r'([a-z])([A-Z])', r'\g<1> \g<2>', word[1:]).split(' ')]
+                    return re.sub(r'([a-z])([A-Z])', r'\g<1> \g<2>', word[1:]).split(' ')
                 if word[:4] == 'http':
                     return [u'<url>']
             for mood in [u'\u2665', r'&lt;3+', r'&amp;lt;3+', r'<3+', r'[^\(]*\)+', r'.*\(+', r':.*']:
                 word = re.sub(mood, '', word)
             if len(word) > 0:
-                return [word.lower()]
+                return [word]
             else:
                 return []
         else:

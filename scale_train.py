@@ -76,12 +76,14 @@ if __name__ == "__main__":
 
                     # Append HOLDOUT instances to the training set
                     holdout = take(int(BATCH_SIZE * HOLDOUT), it)
+
                     if not batch or not holdout:
                         # no more items
                         break
-                    holdouts.extend(holdout)
 
+                    holdouts.extend(holdout)
                     actual_size += len(batch)
+
                     print("\rConsumed: {0} instances".format(actual_size), end="")
                     tweets, outcomes = zip(*batch)
 

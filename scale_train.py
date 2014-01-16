@@ -18,7 +18,7 @@ if __name__ == "__main__":
     csv_table = [['size', 'training_size', 'classifier', 'pp', 'precision', 'recall', 'f1_score']]
 
     # 2^22 = 4194304 < 5292305 (# of rows in tweets.big.db)
-    for exp in (xrange(15, 16) if TESTING else xrange(10, 22)):
+    for exp in (xrange(15, 16) if TESTING else xrange(10, 23)):
         size = 2 ** exp
 
         # Minimal or full preprocessing

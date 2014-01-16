@@ -19,7 +19,7 @@ if SIZE:
 else:
     SIZE = -1
 HOLDOUT = 0.05
-BATCH_SIZE = 10000
+BATCH_SIZE = 100000
 
 
 def take(n, iterable):

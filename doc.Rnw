@@ -43,7 +43,7 @@ The following steps outline the machine learning workflow we have developed:
     \item Preprocessing: We have decided to use a simple space-based tokenization
     (\texttt{tweet.split(' ')}) instead of the one provided by nltk as the nltk
     tokenization produces bad tokens, especially if smileys are involved
-    (\texttt{nltk.word_tokenize(':D :)') -> [':', 'D', ':', ')']}). At the point
+    (\texttt{nltk.word\_tokenize(':D :)') -> [':', 'D', ':', ')']}). At the point
     of tokenization it is not clear what is a smiley and what is not, so filtering
     out smiley before tokenizing is no option. As additional preprocessing steps --
     aside of smiley and RT filtering -- we substitute user names with \texttt{<user>},
@@ -64,7 +64,12 @@ The following steps outline the machine learning workflow we have developed:
     in the tokenization step and normalized the token occurence counts (l1 norm).
     \item Training: We trained a \texttt{SGDClassifier} and a \texttt{MultinominalNB}
     classifier for $\{ 2^n | n = 10, \ldots, 22\}$ training samples with minimal
-    and full preprocessing.
+    and full preprocessing. The training is done in a very memory-efficient way due
+    to batch processing. Using the Preprocessing Generator (see the first item in this
+    list), we iteratively take out a fixed number of \texttt{BATCH\_SIZE} instances
+    and partially train the classifier (using \texttt{partial\_fit}). This allows our
+    method to scale to any corpus size, because we don't need to hold the corpus
+    in the memory in its entirety.
     \item Evaluation: We evaluated the results using Train/Test-Split with a holdout
     of 5\%. Please see the next section for detailed results.
 \end{itemize}
@@ -84,12 +89,12 @@ print(xtable(dt[dt$pp == T & dt$classifier == "SGDClassifier", !names(dt) %in% c
 \subsection{Ridge}
 \subsubsection{With minimal pre-processing}
 <<results="asis">>=
-print(xtable(dt[dt$pp == F & dt$classifier == "RidgeClassifier", !names(dt) %in% c("pp", "classifier")]),
+print(xtable(dt[dt$pp == F & dt$classifier == "MultinomialNB", !names(dt) %in% c("pp", "classifier")]),
      table.placement="H", include.rownames=F)
 @
 \subsubsection{With full pre-processing}
 <<results="asis">>=
-print(xtable(dt[dt$pp == T & dt$classifier == "RidgeClassifier", !names(dt) %in% c("pp", "classifier")]),
+print(xtable(dt[dt$pp == T & dt$classifier == "MultinomialNB", !names(dt) %in% c("pp", "classifier")]),
      table.placement="H", include.rownames=F)
 @
 \section{Q: What is better for this project, more data or a better algorithm?}

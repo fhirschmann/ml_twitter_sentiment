@@ -78,5 +78,5 @@ if __name__ == "__main__":
                     result = classification_report(y_test, y_predicted, target_names=target_names).split()
                     # Take only the averaged scores over the three classes
                     precision, recall, f1_score = result[-4], result[-3], result[-2]
-                    print("F1: ", f1_score)
+                    print("F1:", f1_score)
                     writer.writerow([actual_size, cls.__class__.__name__, full_pp, precision, recall, f1_score])

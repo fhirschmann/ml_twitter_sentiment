@@ -7,6 +7,8 @@ MAPPING = {
     '<3': 2
 }
 
+INV_MAPPING = {v: k for k, v in MAPPING.items()}
+
 # Migh be faster to use re.compile
 
 

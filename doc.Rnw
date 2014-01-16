@@ -62,6 +62,7 @@ The following steps outline the machine learning workflow we have developed:
     we opted not to use IDF for decreased training time. In addition, as far
     as tokenization is concerned, we applied fancy token-level analysis (lemmatizing)
     in the tokenization step and normalized the token occurence counts (l1 norm).
+    Stop words were also removed.
     \item Training: We trained a \texttt{SGDClassifier} and a \texttt{MultinominalNB}
     classifier for $\{ 2^n | n = 10, \ldots, 22\}$ training samples with minimal
     and full preprocessing. The training is done in a very memory-efficient way due

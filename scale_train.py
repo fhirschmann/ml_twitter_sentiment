@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import csv
 import sys
+from itertools import islice
 
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 import numpy as np
 
-from TweetProcessor import TweetProcessor
 from vect import vectorizer
 from cls import cls1, cls2
 from pp import PreProcessor
@@ -32,8 +32,8 @@ if __name__ == "__main__":
                     print("Now training a %s with %s instances (Train-test-split of 5 to 95) and %s pp" % (
                         cls.__class__.__name__, size, "full" if pp else "minimal"))
 
-                    pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", size, pp)
-                    tweets, outcomes = zip(*pp.tweets())
+                    pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", pp)
+                    tweets, outcomes = zip(*islice(pp.tweets(), size))
 
                     tweets = [" ".join(sen) for sen in tweets]
                     y = np.array(outcomes)

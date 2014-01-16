@@ -15,14 +15,10 @@ class PreProcessor(object):
     Python generator that fetches and preprocesses tweets
     in a lazy fashion.
     """
-    def __init__(self, db, amount=None, full_pp=True):
+    def __init__(self, db, full_pp=True):
         connection = sqlite3.connect(db)
         self.full_pp = full_pp
-
-        if amount:
-            self.query = connection.execute('SELECT search_term, text FROM tweets LIMIT 0, %d' % amount)
-        else:
-            self.query = connection.execute('SELECT search_term, text FROM tweets')
+        self.query = connection.execute('SELECT search_term, text FROM tweets')
 
     def tweets(self):
         while True:

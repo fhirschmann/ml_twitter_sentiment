@@ -36,7 +36,28 @@ dt$pp <- as.logical(dt$pp)
 
 \begin{document}
 
-\section{Introduction}
+\section{Architecture Outline}
+
+The following steps outline the machine learning workflow we have developed:
+\begin{itemize}
+    \item Preprocessing: TODO (Dominik)
+    \item Vectorization: We have chosen to use the \texttt{HashingVectorizer}
+    in lieu of using a \texttt{CountVectorizer} in order to profit from
+    the hashing trick. The \texttt{CountVectorizer} holds an in-memory mapping
+    from the string tokens to the integer feature indices. The \texttt{HashingVectorizer}
+    applies a hash function to the features to determine their column index in the
+    sample matrices directly. This results in increased speed and reduced memory
+    usage. However, the trade-off here is that it does not provide IDF weighting and
+    we opted not to use IDF for decreased training time. In addition, as far
+    as tokenization is concerned, we applied fancy token-level analysis (lemmatizing)
+    in the tokenization step and normalized the token occurence counts (l1 norm).
+    \item Training: We trained a \texttt{SGDClassifier} and a \texttt{MultinominalNB}
+    classifier for $\{ 2^n | n = 10, \ldots, 22\}$ training samples with minimal
+    and full preprocessing.
+    \item Evaluation: We evaluated the results using Train/Test-Split with a holdout
+    of 5\%. Please see the next section for detailed results.
+\end{itemize}
+
 \section{Results}
 \subsection{SGD}
 \subsubsection{With minimal pre-processing}

@@ -40,7 +40,18 @@ dt$pp <- as.logical(dt$pp)
 
 The following steps outline the machine learning workflow we have developed:
 \begin{itemize}
-    \item Preprocessing: TODO (Dominik)
+    \item Preprocessing: We have decided to use a simple space-based tokenization
+    (\texttt{tweet.split(' ')}) instead of the one provided by nltk as the nltk
+    tokenization produces bad tokens, especially if smileys are involved
+    (\texttt{nltk.word_tokenize(':D :)') -> [':', 'D', ':', ')']}). At the point
+    of tokenization it is not clear what is a smiley and what is not, so filtering
+    out smiley before tokenizing is no option. As additional preprocessing steps --
+    aside of smiley and RT filtering -- we substitute user names with \texttt{<user>},
+    hashtags with a more readable version of them (\texttt{\#aVeryLongHashtag -> a very long hashtag})
+    and urls with \texttt{<url>} as it might be a valueable information that there
+    once was a url/user name. To cope with the huge amount of data we use the
+    strong python language feature of \emph{generators}: instead of keeping
+    the whole tweet corpus in memory they are lazy-evaluated and loaded on demand.
     \item Vectorization: We have chosen to use the \texttt{HashingVectorizer}
     in lieu of using a \texttt{CountVectorizer} in order to profit from
     the hashing trick. The \texttt{CountVectorizer} holds an in-memory mapping

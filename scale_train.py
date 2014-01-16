@@ -1,52 +1,82 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import csv
 import sys
 from itertools import islice
 
-from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 import numpy as np
 
 from vect import vectorizer
 from cls import cls1, cls2
-from pp import PreProcessor
+from pp import PreProcessor, MAPPING
 
 
 TESTING = "--test" in sys.argv
+HOLDOUT = 0.05
+BATCH_SIZE = 5000
+
+
+def take(n, iterable):
+    "Return first n items of the iterable as a list"
+    return list(islice(iterable, n))
 
 
 if __name__ == "__main__":
     with open('split_result.csv', 'wb') as f:
         writer = csv.writer(f)
-        writer.writerow(['size', 'training_size', 'classifier', 'pp', 'precision', 'recall', 'f1_score'])
+        writer.writerow(['size', 'classifier', 'pp', 'precision', 'recall', 'f1_score'])
 
         # 2^22 = 4194304 < 5292305 (# of rows in tweets.big.db)
-        for exp in (xrange(15, 16) if TESTING else xrange(10, 23)):
+        for exp in (xrange(13, 14) if TESTING else xrange(16, 23)):
             size = 2 ** exp
 
             # Minimal or full preprocessing
-            for pp in [True, False]:
+            for full_pp in [True, False]:
 
                 # Train and evaluate with two classifiers
                 for cls in [cls1, cls2]:
-                    print("Now training a %s with %s instances (Train-test-split of 5 to 95) and %s pp" % (
-                        cls.__class__.__name__, size, "full" if pp else "minimal"))
+                    print("Now training a %s with at most %s instances and %s pp" % (
+                        cls.__class__.__name__, size, "full" if full_pp else "minimal"))
 
-                    pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", pp)
-                    tweets, outcomes = zip(*islice(pp.tweets(), size))
+                    pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", full_pp)
 
-                    tweets = [" ".join(sen) for sen in tweets]
-                    y = np.array(outcomes)
+                    # Take at most `size` elements
+                    it = islice(pp.tweets(), size)
 
-                    X = vectorizer.fit_transform(tweets)
+                    # Hold out HOLDOUT * size instances that will form the test
+                    # set. This will not shuffle the data and may lead to
+                    # a bad test set if the first HOLDOUT * size instances belong
+                    # to the same class. However, due to the nature of our
+                    # architecture (generators/lazy evaluation) this is the
+                    # only way. For this reason, we just shuffled the sqlite
+                    # database beforehand.
+                    test_tweets, test_outcomes = zip(*take(int(HOLDOUT * size), it))
+                    y_test = np.array(test_outcomes)
+                    X_test = vectorizer.fit_transform(test_tweets)
+                    actual_size = 0
 
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.95, random_state=0)
-                    cls.fit(X_train, y_train)
+                    while True:
+                        batch = take(BATCH_SIZE, it)
+                        if not batch:
+                            # no more items
+                            break
+
+                        actual_size += len(batch)
+                        print("\rConsumed: {0} of {1}".format(actual_size, int(size * (1 - HOLDOUT)) + 1), end="")
+                        tweets, outcomes = zip(*batch)
+
+                        y = np.array(outcomes)
+                        X = vectorizer.fit_transform(tweets)
+
+                        cls.partial_fit(X, y, classes=MAPPING.values())
+                    print()
+
                     y_predicted = cls.predict(X_test)
                     target_names = ['class 0', 'class 1', 'class 2']
 
                     result = classification_report(y_test, y_predicted, target_names=target_names).split()
                     # Take only the averaged scores over the three classes
                     precision, recall, f1_score = result[-4], result[-3], result[-2]
-                    print f1_score
-                    writer.writerow([size, len(y_train), cls.__class__.__name__, pp, precision, recall, f1_score])
+                    print("F1: ", f1_score)
+                    writer.writerow([actual_size, cls.__class__.__name__, full_pp, precision, recall, f1_score])

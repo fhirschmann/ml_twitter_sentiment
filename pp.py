@@ -9,8 +9,6 @@ MAPPING = {
 
 INV_MAPPING = {v: k for k, v in MAPPING.items()}
 
-# Migh be faster to use re.compile
-
 
 class PreProcessor(object):
     """

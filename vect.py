@@ -13,4 +13,4 @@ class LemmaTokenizer(object):
 
 
 vectorizer = HashingVectorizer(norm="l1", stop_words=stopwords.words("english"),
-                               tokenizer=LemmaTokenizer())
+                               tokenizer=LemmaTokenizer(), analyzer="word", non_negative=True)

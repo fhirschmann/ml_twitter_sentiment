@@ -2,13 +2,13 @@
 import csv
 import sys
 
-from sklearn.linear_model import RidgeClassifier, SGDClassifier
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 import numpy as np
 
 from TweetProcessor import TweetProcessor
 from vect import vectorizer
+from cls import cls1, cls2
 
 
 TESTING = "--test" in sys.argv
@@ -25,7 +25,7 @@ if __name__ == "__main__":
         for pp in [True, False]:
 
             # Train and evaluate with two classifiers
-            for cls in [RidgeClassifier(), SGDClassifier()]:
+            for cls in [cls1, cls2]:
                 print("Now training a %s with %s instances (Train-test-split of 5 to 95) and %s pp" % (
                       cls.__class__.__name__, size, "full" if pp else "minimal"))
 

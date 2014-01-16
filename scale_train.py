@@ -95,5 +95,5 @@ if __name__ == "__main__":
 
                     # Write intermediate results to file
                     writer.writerow([actual_size, len(holdouts), cls.__class__.__name__, full_pp, precision, recall, f1])
-
+                print()
                 print("F1:", f1)

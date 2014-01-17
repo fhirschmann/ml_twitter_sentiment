@@ -85,7 +85,7 @@ if __name__ == "__main__":
                         precision_score(y_test, cls.predict(X_test)),
                         recall_score(y_test, cls.predict(X_test))))
 
-                    if prev_results:
+                    if prev_results is not None:
                         # This multiplies the previous results with the current
                         # number of instances, adds it to the current results
                         # multiplied by the additional number of instances and

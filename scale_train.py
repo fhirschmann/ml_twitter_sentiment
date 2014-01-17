@@ -92,7 +92,7 @@ if __name__ == "__main__":
                         # normalizes it by the total instances processed so
                         # far.
                         results = (prev_results * n_instances + results * len(batch)) / (n_instances + len(batch))
-                        prev_results = results
+                    prev_results = results
 
                     n_instances += len(batch)
 

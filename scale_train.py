@@ -2,7 +2,7 @@
 from __future__ import print_function, division
 import csv
 import sys
-from itertools import islice, chain, repeat
+from itertools import islice, chain, repeat, tee
 
 from sklearn.metrics import classification_report
 import numpy as np
@@ -28,7 +28,7 @@ else:
 # few thousand instances (this helps when plotting stuff). FOr this
 # reason, we'll set the batch size to 5000 until we reach 50000. Then
 # the given BATCH_SIZE is used.
-DYN_BATCH_SIZE = chain(xrange(5000, 50000, 5000), repeat(BATCH_SIZE))
+DYN_BATCH_SIZE = tee(chain(xrange(5000, 50000, 5000), repeat(BATCH_SIZE)), 4)
 
 
 def take(n, iterable):
@@ -66,11 +66,16 @@ if __name__ == "__main__":
         writer = csv.writer(f)
         writer.writerow(['size', 'classifier', 'pp', 'precision', 'recall', 'f1_score'])
 
+        # Which of the 4 independent dynamic batch size iterators to use
+        dyn_batch_num = -1
+
         # Minimal or full preprocessing
         for full_pp in [True, False]:
 
             # Train and evaluate with two classifiers
             for cls in [cls1, cls2]:
+                dyn_batch_num += 1
+
                 print("Now training a %s with ~%s training instances and %s pp" % (
                     cls.__class__.__name__, int(SIZE * (1 - HOLDOUT)), "full" if full_pp else "minimal"))
 
@@ -88,7 +93,7 @@ if __name__ == "__main__":
                 n_instances = 0
 
                 while True:
-                    batch = take(BATCH_SIZE if TESTING else DYN_BATCH_SIZE.next(), limited_tweets)
+                    batch = take(BATCH_SIZE if TESTING else DYN_BATCH_SIZE[dyn_batch_num].next(), limited_tweets)
                     if not batch:
                         # no more instances
                         break

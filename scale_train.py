@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-from __future__ import print_function
+from __future__ import print_function, division
 import csv
 import sys
 from itertools import islice
 
 from sklearn.metrics import classification_report
+from sklearn.cross_validation import train_test_split
 import numpy as np
 
 from vect import vectorizer
@@ -19,7 +20,7 @@ if SIZE:
 else:
     SIZE = -1
 HOLDOUT = 0.05
-BATCH_SIZE = 50000
+BATCH_SIZE = 5000
 
 
 def take(n, iterable):
@@ -27,22 +28,18 @@ def take(n, iterable):
     return list(islice(iterable, n))
 
 
-def evaluate(cls, test_set):
-    tweets, outcomes = zip(*test_set)
-    y = np.array(outcomes)
-    X = vectorizer.fit_transform(tweets)
-
+def evaluate(cls, X, y):
     y_predicted = cls.predict(X)
     target_names = ['class 0', 'class 1', 'class 2']
 
     result = classification_report(y, y_predicted, target_names=target_names).split()
-    return (result[-4], result[-3], result[-2])
+    return np.array((result[-4], result[-3], result[-2]))
 
 
 if __name__ == "__main__":
     with open('split_result.csv', 'wb') as f:
         writer = csv.writer(f)
-        writer.writerow(['size', 'tsize', 'classifier', 'pp', 'precision', 'recall', 'f1_score'])
+        writer.writerow(['size', 'classifier', 'pp', 'precision', 'recall', 'f1_score'])
 
         # Minimal or full preprocessing
         for full_pp in [True, False]:
@@ -60,43 +57,40 @@ if __name__ == "__main__":
                 else:
                     it = pp.tweets()
 
-                # Hold out HOLDOUT * SIZE instances that will form the test
-                # set. This will not shuffle the data and may lead to
-                # a bad test set if the first HOLDOUT * SIZE instances belong
-                # to the same class. However, due to the nature of our
-                # architecture (generators/lazy evaluation) this is the
-                # only way. For this reason, we just shuffled the sqlite
-                # database beforehand.
-                holdouts = []
-                actual_size = 0
+                n_instances = 0
+                prev_results = None
 
                 while True:
                     # Take the next batch
-                    batch = take(int((1 - HOLDOUT) * BATCH_SIZE), it)
+                    batch = take(BATCH_SIZE, it)
 
-                    # Append HOLDOUT instances to the test set
-                    holdout = take(int(BATCH_SIZE * HOLDOUT), it)
-
-                    if not batch or not holdout:
+                    if not batch:
                         # no more items
                         break
 
-                    holdouts.extend(holdout)
-                    actual_size += len(batch)
-
-                    print("\rConsumed: {0} instances".format(actual_size), end="")
                     tweets, outcomes = zip(*batch)
-
                     y = np.array(outcomes)
                     X = vectorizer.fit_transform(tweets)
+
+                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=HOLDOUT, random_state=0)
+
+                    print("\rConsumed: {0} instances".format(n_instances), end="")
 
                     # Partially fit the instances
                     cls.partial_fit(X, y, classes=MAPPING.values())
 
-                    precision, recall, f1 = evaluate(cls, holdouts)
+                    results = evaluate(cls, X_test, y_test)
+                    if prev_results:
+                        # This multiplies the previous results with the current
+                        # number of instances, adds it to the current results
+                        # multiplied by the additional number of instances and
+                        # normalizes it by the total instances processed so
+                        # far.
+                        results = (prev_results * n_instances + results * len(batch)) / (n_instances + len(batch))
+
+                    n_instances += len(batch)
 
                     # Write intermediate results to file
-                    writer.writerow([actual_size, len(holdouts), cls.__class__.__name__, full_pp, precision, recall, f1])
+                    writer.writerow([n_instances, cls.__class__.__name__, full_pp, results[0], results[1], results[2]])
                     f.flush()
                 print()
-                print("F1:", f1)

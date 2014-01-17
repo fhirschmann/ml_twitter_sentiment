@@ -4,7 +4,7 @@ import csv
 import sys
 from itertools import islice
 
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, precision_score, recall_score
 from sklearn.cross_validation import train_test_split
 import numpy as np
 
@@ -81,7 +81,10 @@ if __name__ == "__main__":
                     # Partially fit the instances
                     cls.partial_fit(X, y, classes=MAPPING.values())
 
-                    results = evaluate(cls, X_test, y_test)
+                    results = np.array((
+                        precision_score(y_test, cls.predict(X_test)),
+                        recall_score(y_test, cls.predict(X_test))))
+
                     if prev_results:
                         # This multiplies the previous results with the current
                         # number of instances, adds it to the current results
@@ -94,6 +97,7 @@ if __name__ == "__main__":
                     n_instances += len(batch)
 
                     # Write intermediate results to file
-                    writer.writerow([n_instances, cls.__class__.__name__, full_pp, results[0], results[1], results[2]])
+                    writer.writerow([n_instances, cls.__class__.__name__, full_pp, results[0], results[1],
+                                     2 * (results[0] * results[1]) / (results[0] + results[1])])
                     f.flush()
                 print()

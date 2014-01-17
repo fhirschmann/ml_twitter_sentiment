@@ -13,14 +13,16 @@ from cls import cls1, cls2
 from pp import PreProcessor, MAPPING
 
 
-TESTING = "--test" in sys.argv
-SIZE = [s for s in sys.argv if s.isdigit()]
-if SIZE:
-    SIZE = int(SIZE[0])
-else:
-    SIZE = -1
 HOLDOUT = 0.05
-BATCH_SIZE = 5000
+
+if "--test" in sys.argv:
+    TESTING = True
+    BATCH_SIZE = 7000
+    SIZE = 100000
+else:
+    TESTING = False
+    BATCH_SIZE = 20000
+    SIZE = -1
 
 
 def take(n, iterable):

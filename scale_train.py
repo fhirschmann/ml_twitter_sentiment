@@ -2,7 +2,7 @@
 from __future__ import print_function, division
 import csv
 import sys
-from itertools import islice
+from itertools import islice, takewhile
 
 from sklearn.metrics import classification_report, precision_score, recall_score
 from sklearn.cross_validation import train_test_split
@@ -17,25 +17,42 @@ HOLDOUT = 0.05
 
 if "--test" in sys.argv:
     TESTING = True
-    BATCH_SIZE = 7000
-    SIZE = 100000
+    BATCH_SIZE = 2000
+    SIZE = 10000
 else:
     TESTING = False
     BATCH_SIZE = 20000
-    SIZE = -1
+    SIZE = 100000  # how many rows are there in the all db?
 
 
 def take(n, iterable):
-    "Return first n items of the iterable as a list"
+    """
+    Return first n items of the iterable as a list
+    """
     return list(islice(iterable, n))
 
 
 def evaluate(cls, X, y):
+    """
+    Returns the precision, recall, and f-score produced when predicting
+    the given test samples.
+    """
     y_predicted = cls.predict(X)
     target_names = ['class 0', 'class 1', 'class 2']
 
     result = classification_report(y, y_predicted, target_names=target_names).split()
-    return np.array((result[-4], result[-3], result[-2]))
+    return (result[-4], result[-3], result[-2])
+
+
+def transform(batch):
+    """
+    Transforms a batch in order to be fed to sklearn.
+    """
+    tweets, outcomes = zip(*batch)
+    y = np.array(outcomes)
+    X = vectorizer.fit_transform(tweets)
+
+    return (X, y)
 
 
 if __name__ == "__main__":
@@ -48,56 +65,38 @@ if __name__ == "__main__":
 
             # Train and evaluate with two classifiers
             for cls in [cls1, cls2]:
-                print("Now training a %s with at most %s instances and %s pp" % (
-                    cls.__class__.__name__, SIZE, "full" if full_pp else "minimal"))
+                print("Now training a %s with ~%s training instances and %s pp" % (
+                    cls.__class__.__name__, int(SIZE * (1 - HOLDOUT)), "full" if full_pp else "minimal"))
 
                 pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", full_pp)
+                tweets = pp.tweets()
 
-                # Take at most `size` elements
-                if SIZE > 0:
-                    it = islice(pp.tweets(), SIZE)
-                else:
-                    it = pp.tweets()
+                # Create the test set. Do note that we did shuffle the database
+                # before and retweets are removed by the PreProcessor.
+                test_tweets = take(int(HOLDOUT * SIZE), tweets)
+                X_test, y_test = transform(test_tweets)
+
+                # Limit the train set
+                limited_tweets = islice(tweets, int(SIZE * (1 - HOLDOUT)))
 
                 n_instances = 0
-                prev_results = None
 
                 while True:
-                    # Take the next batch
-                    batch = take(BATCH_SIZE, it)
-
+                    batch = take(BATCH_SIZE, limited_tweets)
                     if not batch:
-                        # no more items
+                        # no more instances
                         break
 
-                    tweets, outcomes = zip(*batch)
-                    y = np.array(outcomes)
-                    X = vectorizer.fit_transform(tweets)
-
-                    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=HOLDOUT, random_state=0)
-
-                    print("\rConsumed: {0} instances".format(n_instances), end="")
+                    n_instances += len(batch)
+                    X, y = transform(batch)
 
                     # Partially fit the instances
                     cls.partial_fit(X, y, classes=MAPPING.values())
-
-                    results = np.array((
-                        precision_score(y_test, cls.predict(X_test)),
-                        recall_score(y_test, cls.predict(X_test))))
-
-                    if prev_results is not None:
-                        # This multiplies the previous results with the current
-                        # number of instances, adds it to the current results
-                        # multiplied by the additional number of instances and
-                        # normalizes it by the total instances processed so
-                        # far.
-                        results = (prev_results * n_instances + results * len(batch)) / (n_instances + len(batch))
-                    prev_results = results
-
-                    n_instances += len(batch)
+                    results = evaluate(cls, X_test, y_test)
 
                     # Write intermediate results to file
-                    writer.writerow([n_instances, cls.__class__.__name__, full_pp, results[0], results[1],
-                                     2 * (results[0] * results[1]) / (results[0] + results[1])])
+                    writer.writerow([n_instances, cls.__class__.__name__, full_pp, results[0], results[1], results[2]])
                     f.flush()
+
+                    print("\rConsumed: {0} instances".format(n_instances), end="")
                 print()

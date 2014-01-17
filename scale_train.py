@@ -19,7 +19,7 @@ if SIZE:
 else:
     SIZE = -1
 HOLDOUT = 0.05
-BATCH_SIZE = 100000
+BATCH_SIZE = 50000
 
 
 def take(n, iterable):
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                     # Take the next batch
                     batch = take(int((1 - HOLDOUT) * BATCH_SIZE), it)
 
-                    # Append HOLDOUT instances to the training set
+                    # Append HOLDOUT instances to the test set
                     holdout = take(int(BATCH_SIZE * HOLDOUT), it)
 
                     if not batch or not holdout:

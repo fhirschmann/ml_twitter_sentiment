@@ -25,7 +25,7 @@ else:
 
 
 # Dynamic batch size: We want to have smaller chunks for the first
-# few thousand instances (this helps when plotting stuff). FOr this
+# few thousand instances (this helps when plotting stuff). For this
 # reason, we'll set the batch size to 5000 until we reach 50000. Then
 # the given BATCH_SIZE is used.
 DYN_BATCH_SIZE = tee(chain(xrange(5000, 50000, 5000), repeat(BATCH_SIZE)), 4)

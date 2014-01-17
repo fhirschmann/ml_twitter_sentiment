@@ -2,10 +2,9 @@
 from __future__ import print_function, division
 import csv
 import sys
-from itertools import islice, takewhile
+from itertools import islice, chain, repeat
 
-from sklearn.metrics import classification_report, precision_score, recall_score
-from sklearn.cross_validation import train_test_split
+from sklearn.metrics import classification_report
 import numpy as np
 
 from vect import vectorizer
@@ -23,6 +22,13 @@ else:
     TESTING = False
     BATCH_SIZE = 20000
     SIZE = 100000  # how many rows are there in the all db?
+
+
+# Dynamic batch size: We want to have smaller chunks for the first
+# few thousand instances (this helps when plotting stuff). FOr this
+# reason, we'll set the batch size to 5000 until we reach 50000. Then
+# the given BATCH_SIZE is used.
+DYN_BATCH_SIZE = chain(xrange(5000, 50000, 5000), repeat(BATCH_SIZE))
 
 
 def take(n, iterable):
@@ -82,7 +88,7 @@ if __name__ == "__main__":
                 n_instances = 0
 
                 while True:
-                    batch = take(BATCH_SIZE, limited_tweets)
+                    batch = take(BATCH_SIZE if TESTING else DYN_BATCH_SIZE.next(), limited_tweets)
                     if not batch:
                         # no more instances
                         break

@@ -8,8 +8,7 @@ def split(inputDB, trainDB, testDB, length):
     inputCursor = input.cursor()
     trainCursor = train.cursor()
     testCursor = test.cursor()
-    #Check the parameterstyle for sqlite3
-    #print(sqlite3.paramstyle)
+
     #Ensure that the test and train databases are empty
     if bool(trainCursor.execute("SELECT * FROM tweets")):
         trainCursor.execute("DROP TABLE tweets")
@@ -23,19 +22,17 @@ def split(inputDB, trainDB, testDB, length):
     numpy.random.shuffle(tweets)
 
     #Setting Percentage of the split
-    split = len(tweets)/2
+    split = int(len(tweets)/2)
     if (length > 0) & (length < 1):
-        split = length*len(tweets)
+        split = int(length*len(tweets))
         
-    #for tweet in tweets[:split]:
-    #        trainCursor.execute("INSERT INTO tweets '%s' " % tweet)
-    #        print("Inserting some training data")
-    for tweet in tweets[split:]:
-            testCursor.execute("INSERT INTO tweets (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ", (tweet))
-            print("Inserting some testing data")
+    trainCursor.executemany("INSERT INTO tweets VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ", tweets[:split])
+    print("Inserted %d instances into the training database!" % len(tweets[:split]))
+    testCursor.executemany("INSERT INTO tweets VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ", tweets[split:])
+    print("Inserted %d instances into the test database!" % len(tweets[split:]))
     train.commit(), test.commit()
     train.close(), test.close(), input.close()
 
             
 if __name__ == "__main__":
-    split("tweets.small.db", "test.db", "train.db", -1)
+    split("tweets.small.db", "test.db", "train.db", 0.8)

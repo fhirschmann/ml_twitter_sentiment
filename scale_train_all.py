@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 for cls in [cls1, cls2]:
 
                     print("Now training a %s with ~%s training instances and %s pp" % (
-                        cls.__class__.__name__, int(SIZE * (1 - HOLDOUT)), "full" if full_pp else "minimal"))
+                        cls.__class__.__name__, int(size * (1 - HOLDOUT)), "full" if full_pp else "minimal"))
 
                     pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", full_pp)
                     tweets = pp.tweets()

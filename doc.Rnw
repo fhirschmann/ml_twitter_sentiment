@@ -6,6 +6,7 @@
 \usepackage{fancyhdr,lastpage}
 \usepackage{hyperref}
 \usepackage{geometry}
+\usepackage{longtable}
 \usepackage{booktabs}
 \geometry{hmargin={2cm,2cm},vmargin={2.4cm,3cm}}
 \usepackage{comment}
@@ -28,14 +29,19 @@
 <<setup, include=FALSE>>=
 # Install these packages besides the "knitr" package using install.packages("...")
 library(xtable)
+library(car)
 
 opts_chunk$set(echo=F, breaklines=T)
-dt <- read.csv("split_result.csv")
-dt$pp <- as.logical(dt$pp)
+adt <- read.csv("final_result.csv")
+adt$pp <- as.logical(adt$pp)
 
 seldt <- function(classifier, pp) {
-    dt[dt$classifier == classifier & dt$pp == T, !names(dt) %in% c("pp", "classifier")]
+    adt[adt$classifier == classifier & adt$pp == T, !names(adt) %in% c("pp", "classifier")]
 }
+sgd_f <- seldt("SGDClassifier", F)
+sgd_t <- seldt("SGDClassifier", T)
+nb_f <- seldt("MultinomialNB", F)
+nb_t <- seldt("MultinomialNB", t)
 @
 
 \begin{document}
@@ -80,23 +86,19 @@ The following steps outline the machine learning workflow we have developed:
 \end{itemize}
 
 \section{Results}
-\subsection{SGD}
-\subsubsection{With minimal pre-processing}
-<<results="asis">>=
-print(xtable(sel("SGDClassifier", F)), table.placement="H", include.rownames=F)
+\subsection{With minimal pre-processing}
+<<results="asis", fig.height=4.2>>=
+plot(f1_score ~ size, data=sgd_f, type="l", log="x", col="blue", ylim=c(0,0.6))
+lines(f1_score ~ size, data=nb_f, col="red")
+grid()
+legend("bottomright", c("SGDClassifier", "MultinomialNB"),lty=c(1, 1), lwd=c(2.5, 2.5), col=c("blue", "red"))
 @
-\subsubsection{With full pre-processing}
-<<results="asis">>=
-print(xtable(sel("SGDClassifier", T)), table.placement="H", include.rownames=F)
-@
-\subsection{Ridge}
-\subsubsection{With minimal pre-processing}
-<<results="asis">>=
-print(xtable(sel("MultinominalNB", F)), table.placement="H", include.rownames=F)
-@
-\subsubsection{With full pre-processing}
-<<results="asis">>=
-print(xtable(sel("MultinominalNB", T)), table.placement="H", include.rownames=F)
+\subsection{With full pre-processing}
+<<results="asis", fig.height=4.2>>=
+plot(f1_score ~ size, data=sgd_t, type="l", log="x", col="blue", ylim=c(0,0.6))
+lines(f1_score ~ size, data=nb_t, col="red")
+grid()
+legend("bottomright", c("SGDClassifier", "MultinomialNB"),lty=c(1, 1), lwd=c(2.5, 2.5), col=c("blue", "red"))
 @
 \section{Q: What is better for this project, more data or a better algorithm?}
 Ideally, both of these points. However, the classifier benefits more from a larger
@@ -108,5 +110,9 @@ As far as preprocessing is concerned, it should always be done because it is rel
 cheap to do (in terms of computing time) and the final model benefits greatly from
 it.
 
-
+\appendix
+\section{Detailed Results}
+<<results="asis">>=
+print(xtable(adt), table.placement="H", include.rownames=F, floating=F, tabular.environment="longtable")
+@
 \end{document}

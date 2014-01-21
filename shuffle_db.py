@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB = "tweets.small.db"
+DB = "tweets.all.db"
 
 if __name__ == "__main__":
     db = sqlite3.connect(DB)

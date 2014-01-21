@@ -24,16 +24,17 @@ if "--test" in sys.argv:
     SIZE = 10000
 else:
     TESTING = False
-    BATCH_SIZE = 50000
-    SIZE = 1000000  # how many rows are there in the all db?
+    BATCH_SIZE = 300000
+    #SIZE = 25690000
+    SIZE = 10000000
 
 
 # Dynamic batch size: We want to have smaller chunks for the first
-# few thousand instances (this helps when plotting stuff). For this
-# reason, we'll set the batch size to 5000 until we reach 50000. Then
-# the given BATCH_SIZE is used.
+# few thousand instances (this helps when plotting stuff).
 def dyn_batch_gen():
-    for i in xrange(5000, 50000, 5000):
+    for i in [100, 500, 1000, 2000, 5000, 10000, 20000, 40000, 60000, 80000, 100000]:
+        yield i
+    for i in xrange(100000, 400000, 50000):
         yield i
     while True:
         yield BATCH_SIZE
@@ -90,11 +91,10 @@ if __name__ == "__main__":
                 print("Now training a %s with ~%s training instances and %s pp" % (
                     cls.__class__.__name__, int(SIZE * (1 - HOLDOUT)), "full" if full_pp else "minimal"))
 
-                pp = PreProcessor("tweets.small.db" if TESTING else "tweets.big.db", full_pp)
+                pp = PreProcessor("tweets.small.db" if TESTING else "tweets.all_shuffled.db", full_pp)
                 tweets = pp.tweets()
 
-                vectorizer = HashingVectorizer(norm="l1", stop_words=stopwords.words("english"),
-                                               tokenizer=LemmaTokenizer(), analyzer="word",
+                vectorizer = HashingVectorizer(stop_words=stopwords.words("english"),
                                                non_negative=True if cls.__class__.__name__ == "MultinomialNB" else False)
 
                 # Create the test set. Do note that we did shuffle the database
@@ -127,4 +127,5 @@ if __name__ == "__main__":
                     f.flush()
 
                     print("\rConsumed: {0} instances".format(n_instances), end="")
+                    sys.stdout.flush()
                 print()

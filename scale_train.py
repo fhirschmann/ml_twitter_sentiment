@@ -32,10 +32,8 @@ else:
 # Dynamic batch size: We want to have smaller chunks for the first
 # few thousand instances (this helps when plotting stuff).
 def dyn_batch_gen():
-    for i in [100, 500, 1000, 2000, 5000, 10000, 20000, 40000, 60000, 80000, 100000]:
-        yield i
-    for i in xrange(100000, 400000, 50000):
-        yield i
+    for i in xrange(4, 22):
+        yield 2 ** i
     while True:
         yield BATCH_SIZE
 

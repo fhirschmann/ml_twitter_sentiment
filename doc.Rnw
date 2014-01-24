@@ -70,49 +70,48 @@ The following steps outline the machine learning workflow we have developed:
     sample matrices directly. This results in increased speed and reduced memory
     usage. However, the trade-off here is that it does not provide IDF weighting and
     we opted not to use IDF for decreased training time. In addition, as far
-    as tokenization is concerned, we applied fancy token-level analysis (lemmatizing)
-    in the tokenization step and normalized the token occurence counts (l1 norm).
+    as tokenization is concerned, we tried fancy token-level analysis (lemmatizing)
+    in the tokenization step, but removed this step later on because it did not
+    increase our scores.
     Stop words were also removed.
     \item Training: We trained a \texttt{SGDClassifier} and a \texttt{MultinominalNB}
-    classifier for $\{ 2^n | n = 10, \ldots, 22\}$ training samples with minimal
+    classifier for with all training samples (\texttt{tweets.all\_shuffled.db}) with minimal
     and full preprocessing. The training is done in a very memory-efficient way due
     to batch processing. Using the Preprocessing Generator (see the first item in this
-    list), we iteratively take out a fixed number of \texttt{BATCH\_SIZE} instances
+    list), we iteratively take out a variable yet fixed number of \texttt{BATCH\_SIZE} instances
     and partially train the classifier (using \texttt{partial\_fit}). This allows our
     method to scale to any corpus size, because we don't need to hold the corpus
     in the memory in its entirety.
     \item Evaluation: We evaluated the results using Train/Test-Split with a holdout
     of 5\%. Please see the next section for detailed results.
 \end{itemize}
+\newpage
 
 \section{Results}
 \subsection{With minimal pre-processing}
 <<results="asis", fig.height=4.2>>=
-plot(f1_score ~ size, data=sgd_f, type="l", log="x", col="blue", ylim=c(0,0.6))
+plot(f1_score ~ size, data=sgd_f, type="l", log="x", col="blue", xlab="Corpus Size", ylab="F-Score", xlim=c(16,18025887), ylim=c(0,0.7))
 lines(f1_score ~ size, data=nb_f, col="red")
 grid()
 legend("bottomright", c("SGDClassifier", "MultinomialNB"),lty=c(1, 1), lwd=c(2.5, 2.5), col=c("blue", "red"))
 @
 \subsection{With full pre-processing}
 <<results="asis", fig.height=4.2>>=
-plot(f1_score ~ size, data=sgd_t, type="l", log="x", col="blue", ylim=c(0,0.6))
+plot(f1_score ~ size, data=sgd_t, type="l", log="x", col="blue", xlab="Corpus Size", ylab="F-Score", xlim=c(16,18025887), ylim=c(0,0.7))
 lines(f1_score ~ size, data=nb_t, col="red")
 grid()
 legend("bottomright", c("SGDClassifier", "MultinomialNB"),lty=c(1, 1), lwd=c(2.5, 2.5), col=c("blue", "red"))
 @
 \section{Q: What is better for this project, more data or a better algorithm?}
-Ideally, both of these points. However, the classifier benefits more from a larger
-training corpus. We have tried SVMs and Neural Networks on a smaller corpus and
-the results were only slightly better than with Stochastic Gradient Descent or
-Ridge Regression whilst the training time increased tremendously. For a larger
-corpus and limited resources, it is therefore better to choose a rather fast algorithm.
-As far as preprocessing is concerned, it should always be done because it is relatively
-cheap to do (in terms of computing time) and the final model benefits greatly from
-it.
+For this project, the algorithm hardly makes a difference, given that enough
+training data is available. However, at some point, no improvement occurs as
+far as the scores are concerned. The algorithms we have tried seem to converge
+at some point, after which additional training instances serve no purpose.
 
 \appendix
 \section{Detailed Results}
 <<results="asis">>=
-print(xtable(adt), table.placement="H", include.rownames=F, floating=F, tabular.environment="longtable")
+print(xtable(adt), table.placement="H", include.rownames=F, floating=F, tabular.environment="longtable", size="\\footnotesize")
 @
+In the table above, \texttt{pp} refers to full (\texttt{TRUE}) or partial (\texttt{FALSE}) preprocessing.
 \end{document}

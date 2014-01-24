@@ -41,7 +41,7 @@ seldt <- function(classifier, pp) {
 sgd_f <- seldt("SGDClassifier", F)
 sgd_t <- seldt("SGDClassifier", T)
 nb_f <- seldt("MultinomialNB", F)
-nb_t <- seldt("MultinomialNB", t)
+nb_t <- seldt("MultinomialNB", T)
 @
 
 \begin{document}

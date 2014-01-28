@@ -6,6 +6,7 @@
 
 import pickle
 import numpy as np
+from itertools import islice
 
 from sklearn.naive_bayes import MultinomialNB
 from vect import vectorizer
@@ -16,7 +17,7 @@ class TwitterSentiment:
         self.vectorizer = vectorizer
         self.classifier = MultinomialNB()
         self.preprocessor = PreProcessor("tweets.small.db", True)
-        X, y = self.transform(self.preprocessor.tweets())
+        X, y = self.transform(islice(self.preprocessor.tweets(), 100))
         self.classifier.fit(X, y)
 
     def transform(self, batch):

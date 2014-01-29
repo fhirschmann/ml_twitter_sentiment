@@ -6,7 +6,6 @@
 
 import pickle
 import numpy as np
-from itertools import islice
 
 from sklearn.naive_bayes import MultinomialNB
 from vect import vectorizer
@@ -17,7 +16,7 @@ class TwitterSentiment:
         self.vectorizer = vectorizer
         self.classifier = MultinomialNB()
         self.preprocessor = PreProcessor("tweets.small.db", True)
-        X, y = self.transform(islice(self.preprocessor.tweets(), 100))
+        X, y = self.transform(self.preprocessor.tweets())
         self.classifier.fit(X, y)
 
     def transform(self, batch):
@@ -31,7 +30,7 @@ class TwitterSentiment:
         clean = []
         words = text.replace('"', '').replace('\n', ' ').split(' ')
         for word in words: clean += self.preprocessor.process_word(word)
-        return self.classifier.predict(self.vectorizer.fit_transform(np.array(clean)))
+        return self.classifier.predict(self.vectorizer.fit_transform([' '.join(clean)]))[0]
 
     def predict_all(self, seq):
         '''predict all emoticons for a list of strings by using a trained classifier'''
@@ -42,7 +41,10 @@ if __name__ == '__main__':
     ts = TwitterSentiment()
     text = raw_input('How may I serve you, humble master?\n')
     while text is not 'q':
-        print ts.predict(text)
+        prediction = ts.predict(text)
+        for smiley, m in MAPPING.iteritems():
+            if prediction == m:
+                print smiley
         text = raw_input('How may I serve you, humble master? [q to quit]\n')
     print 'Master has given Dobby a sock. Dobby is free.'
     #you can vectorize your TwitterSentiment class by using pickle:

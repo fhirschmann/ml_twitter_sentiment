@@ -129,4 +129,5 @@ if __name__ == "__main__":
                     sys.stdout.flush()
                 print()
 
-                pickle.dump(cls, cls.__class__.__name__ + ".p")
+                with open(cls.__class__.__name__ + ("_pp" if full_pp else "_minpp") + ".p", "wb") as pf:
+                    pickle.dump(cls, pf)

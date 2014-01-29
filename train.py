@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 tweets = pp.tweets()
 
                 vectorizer = HashingVectorizer(stop_words=stopwords.words("english"),
-                                               non_negative=True if cls.__class__.__name__ == "MultinomialNB" else False)
+                                               non_negative=cls.__class__.__name__ == "MultinomialNB")
 
                 # Create the test set. Do note that we did shuffle the database
                 # before and retweets are removed by the PreProcessor.

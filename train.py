@@ -24,8 +24,8 @@ if "--test" in sys.argv:
 else:
     TESTING = False
     BATCH_SIZE = 300000
-    #SIZE = 25690000
-    SIZE = 10000000
+    SIZE = 25690000
+    #SIZE = 10000000
 
 
 # Dynamic batch size: We want to have smaller chunks for the first

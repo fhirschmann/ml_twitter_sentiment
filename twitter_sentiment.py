@@ -28,12 +28,17 @@ class TwitterSentiment:
 
 
 if __name__ == '__main__':
-    ts = TwitterSentiment()
-    ts.cls = pickle.load(open("MultinomialNB_pp.p", "rb"))
-
     if "--dump" in sys.argv:
+        ts = TwitterSentiment()
+        with open('MultinomialNB_pp.p', 'rb') as fc:
+            ts.cls = pickle.load(fc)
+
         with open('TwitterSentiment.pickle', 'wb') as f:
             pickle.dump(ts, f)
+        sys.exit(0)
+    else:
+        with open('TwitterSentiment.pickle', 'rb') as f:
+            ts = pickle.load(f)
 
     text = raw_input('How may I serve you, humble master?\n')
     while text is not 'q':

@@ -3,17 +3,15 @@ from __future__ import print_function, division
 import csv
 import sys
 import cPickle as pickle
-from itertools import islice, chain, repeat, tee
+from itertools import islice
 
 from sklearn.metrics import classification_report
-from sklearn.linear_model import RidgeClassifier, SGDClassifier
+from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import HashingVectorizer
 from nltk.corpus import stopwords
 import numpy as np
 
-from vect import LemmaTokenizer
-from cls import cls1, cls2
 from pp import PreProcessor, MAPPING
 
 
@@ -69,16 +67,13 @@ def transform(vectorizer, batch, fit=True):
     else:
         X = vectorizer.transform(tweets)
 
-    return (X, y)
+    return X, y
 
 
 if __name__ == "__main__":
     with open('split_result.csv', 'wb') as f:
         writer = csv.writer(f)
         writer.writerow(['size', 'classifier', 'pp', 'precision', 'recall', 'f1_score'])
-
-        # Which of the 4 independent dynamic batch size iterators to use
-        dyn_batch_num = -1
 
         # Minimal or full preprocessing
         for full_pp in [True, False]:

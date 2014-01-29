@@ -95,7 +95,6 @@ if __name__ == "__main__":
                 # before and retweets are removed by the PreProcessor.
                 test_tweets = take(int(HOLDOUT * SIZE), tweets)
 
-                # Not quite sure if we should fit or not
                 X_test, y_test = transform(vectorizer, test_tweets, False)
 
                 # Limit the train set

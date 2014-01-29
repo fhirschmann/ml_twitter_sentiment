@@ -37,5 +37,4 @@ if __name__ == '__main__':
     while text is not 'q':
         print(INV_MAPPING[ts.predict(text)])
         text = raw_input('How may I serve you, humble master? [q to quit]\n')
-    print 'Master has given Dobby a sock. Dobby is free.'
-    #you can vectorize your TwitterSentiment class by using pickle:
+    print('Master has given Dobby a sock. Dobby is free.')

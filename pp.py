@@ -15,10 +15,12 @@ class PreProcessor(object):
     Python generator that fetches and preprocesses tweets
     in a lazy fashion.
     """
-    def __init__(self, db, full_pp=True):
-        connection = sqlite3.connect(db)
+    def __init__(self, db=None, full_pp=True):
         self.full_pp = full_pp
-        self.query = connection.execute('SELECT search_term, text FROM tweets')
+
+        if db:
+            connection = sqlite3.connect(db)
+            self.query = connection.execute('SELECT search_term, text FROM tweets')
 
     def tweets(self):
         while True:
@@ -35,15 +37,23 @@ class PreProcessor(object):
                 continue
 
             else:
-                words = tweet.replace('"', '').replace('\n', ' ').split(' ')
-                if len(words) == 0:
-                    # tweet is empty -> don't yield it
+                ptweet = self.process_tweet(tweet)
+                if ptweet:
+                    yield ptweet, cls
+                else:
                     continue
-                clean = []
-                for word in words:
-                    clean += self.process_word(word)
 
-                yield (' '.join(clean), cls)
+    def process_tweet(self, tweet):
+        words = tweet.replace('"', '').replace('\n', ' ').split(' ')
+
+        if len(words) == 0:
+            # tweet is empty -> don't yield it
+            return None
+        clean = []
+        for word in words:
+            clean += self.process_word(word)
+
+        return ' '.join(clean)
 
     def process_word(self, word):
         if len(word) > 0:

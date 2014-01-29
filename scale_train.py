@@ -129,4 +129,4 @@ if __name__ == "__main__":
                     sys.stdout.flush()
                 print()
 
-                pickle.dump(cls, cls.__class.__name__ + ".p")
+                pickle.dump(cls, cls.__class__.__name__ + ".p")

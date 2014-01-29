@@ -6,13 +6,15 @@
 import sys
 import cPickle as pickle
 
-from vect import vectorizer
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import HashingVectorizer
+
 from pp import PreProcessor, INV_MAPPING
 
 
 class TwitterSentiment:
     def __init__(self):
-        self.vec = vectorizer
+        self.vec = HashingVectorizer(stop_words=stopwords.words("english"), non_negative=True)
         self.pp = PreProcessor(full_pp=True)
         self.cls = None
 

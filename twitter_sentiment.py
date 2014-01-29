@@ -1,6 +1,6 @@
 # Twitter sentiment analysis project
 #
-# Group name:
+# Group name: GeneratorsFTW
 # Group members: Dominik Schreiber, Ji-Ung Lee, Fabian Hirschmann
 #
 import sys

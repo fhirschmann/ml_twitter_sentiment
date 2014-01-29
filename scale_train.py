@@ -2,6 +2,7 @@
 from __future__ import print_function, division
 import csv
 import sys
+import cPickle as pickle
 from itertools import islice, chain, repeat, tee
 
 from sklearn.metrics import classification_report
@@ -127,3 +128,5 @@ if __name__ == "__main__":
                     print("\rConsumed: {0} instances".format(n_instances), end="")
                     sys.stdout.flush()
                 print()
+
+                pickle.dump(cls, cls.__class.__name__ + ".p")

@@ -22,7 +22,7 @@
 \setlength{\headheight}{20pt}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{Dominik Schreiber, Ji-Ung Lee, Fabian Hirschmann}
+\fancyhead[L]{Fabian Hirschmann, Ji-Ung Lee, Dominik Schreiber}
 \fancyhead[R]{\today}
 \fancyfoot[C]{Page \thepage\ of \pageref{LastPage}}
 
